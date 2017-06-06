@@ -1,0 +1,28 @@
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+    <data>
+        <variable
+            name="employee" type="com.wonhwee.empmgr.model.Employee" />
+    </data>
+
+        <LinearLayout
+            android:layout_width="match_parent" android:layout_height="match_parent"
+            android:orientation="vertical">
+          <Spinner
+              android:id="@+id/spPositions"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content" />
+          <EditText
+              android:id="@+id/editEmp"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:hint="@string/name"
+              android:tag="@{employee.Id}"
+              android:text="@={employee.text}"/>
+          <EditText
+              android:id="@+id/editEmail"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:hint="@string/email"
+              android:text="@={employee.email}" />
+        </LinearLayout>
+</layout>

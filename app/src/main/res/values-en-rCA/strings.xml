@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">Employee Manager</string>
+    <string name="action_edit_pos">Edit Position</string>
+    <string name="action_delete_all_employees">Delete all employees</string>
+    <string name="action_create_test_data">Insert Test Data</string>
+    <string name="action_send_email">Send email</string>
+    <string name="action_add_employee">Add Employee</string>
+    <string name="pos_code">Position 3-char-code</string>
+    <string name="pos_desc">Position description</string>
+    <string name="action_delete_todo">Delete</string>
+    <string name="delete_categories_dialog">Do you really want to delete the position?</string>
+    <string name="delete_categories_dialog_title">Confirm</string>
+    <string name="delete_todo_dialog_title">confirm</string>
+    <string name="delete_todo_dialog">Are you sure you want to delete this Employee?</string>
+    <string name="action_show_done">Show done</string>
+    <string name="newCategory">New</string>
+    <string name="save_category">Save</string>
+    <string name="delete_category">Delete</string>
+    <string name="name">Name</string>
+    <string name="email">Email</string>
+    <string name="action_cancel">Cancel</string>
+
+    <string-array name="position_sample_array">
+        <item>{\'code\':\'CEO\', \'desc\':\'Chief Executive Officer\'}</item>
+        <item>{\'code\':\'CFO\', \'desc\':\'Chief Financial Officer\'}</item>
+        <item>{\'code\':\'CTO\', \'desc\':\'Chief Technologies Officer\'}</item>
+        <item>{\'code\':\'CMO\', \'desc\':\'Chief Marketing Officer\'}</item>
+    </string-array>
+
+    <string name="employee_sample">{\'name\':\'Wonhwee Loh\', \'email\':\'wonhwee_loh@yahoo.ca\'}</string>
+
+</resources>
