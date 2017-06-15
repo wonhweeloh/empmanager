@@ -4,12 +4,18 @@ import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.util.Log;
+
+import com.wonhwee.empmgr.client.HttpClient;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import static com.wonhwee.empmgr.dao.EmpMgrContract.CONTENT_AUTHORITY;
 import static com.wonhwee.empmgr.dao.EmpMgrContract.PositionEntry;
@@ -18,6 +24,9 @@ import static com.wonhwee.empmgr.dao.EmpMgrContract.PATH_EMPLOYEE;
 import static com.wonhwee.empmgr.dao.EmpMgrContract.EmployeeEntry;
 
 public class EmpMgrProvider extends ContentProvider{
+
+    public static final String module = EmpMgrProvider.class.getSimpleName();
+
     //constants for the operation
     private static final int EMPLOYEES = 1;
     private static final int EMPLOYEE_ID = 2;
@@ -25,6 +34,10 @@ public class EmpMgrProvider extends ContentProvider{
     private static final int POSITION_ID = 4;
     //urimatcher
     private static final UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+
+    private String packageName = "";
+    private String empmgr_server_proto_ip_port = "";
+    private Resources res = null;
 
     static {
         uriMatcher.addURI(CONTENT_AUTHORITY, PATH_EMPLOYEE, EMPLOYEES);
@@ -37,6 +50,9 @@ public class EmpMgrProvider extends ContentProvider{
     @Override
     public boolean onCreate() {
         helper = new DatabaseHelper(getContext());
+        packageName = getContext().getPackageName();
+        res = getContext().getResources();
+        empmgr_server_proto_ip_port = res.getString(res.getIdentifier("empmgr_server_proto_ip_port", "string", packageName));
         return true;
     }
 
@@ -105,7 +121,28 @@ public class EmpMgrProvider extends ContentProvider{
     }
 
     private Uri insertRecord(Uri uri, ContentValues values, String table) {
-        //this time we need a writable database
+        if(table.equals(EmpMgrContract.EmployeeEntry.TABLE_NAME)) {
+            String email = values.get(EmployeeEntry.COLUMN_EMAIL).toString();
+            String name = values.get(EmployeeEntry.COLUMN_TEXT).toString().replace(" ", "%20");
+            String code = values.get(EmployeeEntry.COLUMN_POSITIONID).toString();
+            String jsonStr = HttpClient.getResponse(empmgr_server_proto_ip_port + "/empmgr/updateemployee.json?email=" + email + "&name=" + name + "&code=" + code + "&id=-1");
+
+            Log.d(module, "jsonStr:" + jsonStr);
+
+            if (jsonStr == null || jsonStr.length() <= 0) {
+                // http request is failed in this case.
+                return null;
+            }
+
+            try {
+                JSONObject jsonObject = new JSONObject(jsonStr);
+                String id = jsonObject.getString("id");
+                values.put(EmployeeEntry._ID, id);
+            }catch(JSONException e){
+                return null;
+            }
+        }
+
         SQLiteDatabase db = helper.getWritableDatabase();
         long id = db.insert(table, null, values);
         if (id == -1) {
@@ -139,7 +176,18 @@ public class EmpMgrProvider extends ContentProvider{
     }
 
     private int deleteRecord(Uri uri, String selection, String[] selectionArgs, String tableName) {
-        //this time we need a writable database
+        if(tableName.equals(EmpMgrContract.EmployeeEntry.TABLE_NAME) && selectionArgs != null && selectionArgs.length > 0) {
+            String id = selectionArgs[0];
+            String jsonStr = HttpClient.getResponse(empmgr_server_proto_ip_port + "/empmgr/deleteemployee.json?id=" + id);
+
+            Log.d(module, "jsonStr:" + jsonStr);
+
+            if(jsonStr == null || jsonStr.length() <= 0){
+                // http request is failed in this case.
+                return -1;
+            }
+        }
+
         SQLiteDatabase db = helper.getWritableDatabase();
         int id = db.delete(tableName, selection, selectionArgs);
         if (id == -1) {
@@ -164,13 +212,28 @@ public class EmpMgrProvider extends ContentProvider{
     }
 
     private int updateRecord(Uri uri, ContentValues values, String selection, String[] selectionArgs, String tableName) {
-        //this time we need a writable database
+        if(tableName.equals(EmpMgrContract.EmployeeEntry.TABLE_NAME) && selectionArgs != null && selectionArgs.length > 0) {
+            String email = values.get(EmployeeEntry.COLUMN_EMAIL).toString();
+            String name = values.get(EmployeeEntry.COLUMN_TEXT).toString().replace(" ", "%20");
+            String code = values.get(EmployeeEntry.COLUMN_POSITIONID).toString();
+            String id = selectionArgs[0];
+            String jsonStr = HttpClient.getResponse(empmgr_server_proto_ip_port + "/empmgr/updateemployee.json?email=" + email + "&name=" + name + "&code=" + code + "&id=" + id);
+
+            Log.d(module, "jsonStr:" + jsonStr);
+
+            if(jsonStr == null || jsonStr.length() <= 0){
+                // http request is failed in this case.
+                return -1;
+            }
+        }
+
         SQLiteDatabase db = helper.getWritableDatabase();
         int id = db.update(tableName, values, selection, selectionArgs);
         if (id == 0) {
             Log.e("Error", "update error for URI " + uri);
             return -1;
         }
+        getContext().getContentResolver().notifyChange(uri, null);
         return id;
     }
 }

@@ -28,6 +28,7 @@ public class EmployeeEditActivity extends AppCompatActivity {
     PositionList positionList;
     PositionListAdapter positionListAdapter;
     private boolean mIsCancelling = false;
+    private boolean mIsDeleting = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +56,7 @@ public class EmployeeEditActivity extends AppCompatActivity {
         }
         else {
             for (Position cat : positionList.ItemList) {
-                if (Integer.valueOf(cat.posId.get()) == Integer.valueOf(employee.positionid.get())) {
+                if (Integer.valueOf(cat.posId.get()).equals(Integer.valueOf(employee.positionid.get()))) {
                     break;
                 }
                 position++;
@@ -89,6 +90,7 @@ public class EmployeeEditActivity extends AppCompatActivity {
                             arguments[0] = String.valueOf(employee.Id.get());
 
                             empMgrAsyncQueryHandler.startDelete(1, null, uri, selection, arguments);
+                            mIsDeleting = true;
                             Intent intent = new Intent(EmployeeEditActivity.this, EmployeeListActivity.class);
                             startActivity(intent);
                         }})
@@ -123,6 +125,10 @@ public class EmployeeEditActivity extends AppCompatActivity {
         }
 
         if(mIsCancelling){
+            return;
+        }
+
+        if(mIsDeleting){
             return;
         }
         //*** Validation (end) ***//

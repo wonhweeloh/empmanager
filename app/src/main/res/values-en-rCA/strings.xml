@@ -21,12 +21,16 @@
     <string name="action_cancel">Cancel</string>
 
     <string-array name="position_sample_array">
-        <item>{\'code\':\'CEO\', \'desc\':\'Chief Executive Officer\'}</item>
-        <item>{\'code\':\'CFO\', \'desc\':\'Chief Financial Officer\'}</item>
-        <item>{\'code\':\'CTO\', \'desc\':\'Chief Technologies Officer\'}</item>
-        <item>{\'code\':\'CMO\', \'desc\':\'Chief Marketing Officer\'}</item>
+        <item>{\'id\':\'2147483647\', \'code\':\'CEO\', \'desc\':\'Chief Executive Officer\'}</item>
+        <item>{\'id\':\'2147483646\', \'code\':\'CTO\', \'desc\':\'Chief Technology Officer\'}</item>
+        <item>{\'id\':\'2147483645\', \'code\':\'CMO\', \'desc\':\'Chief Marketing Officer\'}</item>
+        <item>{\'id\':\'2147483644\', \'code\':\'CFO\', \'desc\':\'Chief Financial Officer\'}</item>
+        <item>{\'id\':\'2147483643\', \'code\':\'COO\', \'desc\':\'Chief Operating Officer\'}</item>
+        <item>{\'id\':\'2147483642\', \'code\':\'CIO\', \'desc\':\'Chief Information Officer\'}</item>
     </string-array>
 
     <string name="employee_sample">{\'name\':\'Wonhwee Loh\', \'email\':\'wonhwee_loh@yahoo.ca\'}</string>
+
+    <string name="empmgr_server_proto_ip_port">http://192.168.1.15:8080</string>
 
 </resources>

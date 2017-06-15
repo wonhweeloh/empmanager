@@ -7,13 +7,16 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.wonhwee.empmgr.client.HttpClient;
 import com.wonhwee.empmgr.dao.EmpMgrContract.PositionEntry;
 import com.wonhwee.empmgr.dao.EmpMgrContract.EmployeeEntry;
 
 public class DatabaseHelper extends SQLiteOpenHelper{
+    public static final String module = DatabaseHelper.class.getSimpleName();
 
     private final Resources res;
     private final String packageName;
@@ -60,11 +63,13 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
             try {
                 jobj = new JSONObject(jsonStr);
+                String id = jobj.getString("id");
                 String desc = jobj.getString("desc");
                 String code = jobj.getString("code");
 
-                values.put (PositionEntry.COLUMN_DESCRIPTION, desc);
-                values.put (PositionEntry.COLUMN_CODE, code);
+                values.put(PositionEntry._ID, id);
+                values.put(PositionEntry.COLUMN_DESCRIPTION, desc);
+                values.put(PositionEntry.COLUMN_CODE, code);
                 idPosition = db.insert(PositionEntry.TABLE_NAME, null, values);
                 values.clear();
             }catch(JSONException e){
@@ -74,7 +79,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
             }
         }
 
-        if(idPosition > 0) {
+/*        if(idPosition > 0) {
             String employee_sample_array = res.getString(res.getIdentifier("employee_sample", "string", packageName));
             try{
                 jobj = new JSONObject(employee_sample_array);
@@ -89,8 +94,36 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 Log.d(e.getMessage(), "Failed to parse:" + employee_sample_array);
                 values.clear();
             }
-        }
+        }*/
         //*** Setting up sample position and employee data from strings.xml (end) ***/
+
+        String empmgr_server_proto_ip_port = res.getString(res.getIdentifier("empmgr_server_proto_ip_port", "string", packageName));
+        String jsonStr = HttpClient.getResponse(empmgr_server_proto_ip_port + "/empmgr/employees.json");
+
+        if (jsonStr != null && jsonStr.length() > 0) {
+
+            try {
+                JSONArray jsonArray = new JSONArray(jsonStr);
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+                    long id = jsonObject.getLong("id");
+                    String text = jsonObject.getString("text");
+                    String email = jsonObject.getString("email");
+                    long positionId = jsonObject.getLong("positionId");
+
+                    values.put(EmployeeEntry._ID, id);
+                    values.put(EmployeeEntry.COLUMN_TEXT, text);
+                    values.put(EmployeeEntry.COLUMN_EMAIL, email);
+                    values.put(EmployeeEntry.COLUMN_POSITIONID, positionId);
+                    long idEmployee = db.insert(EmployeeEntry.TABLE_NAME, null, values);
+                }
+            } catch (JSONException e) {
+                Log.e(module, e.getMessage());
+                values.clear();
+            }
+        }
+        Log.d(module, "Parsing http JSON request is done:" + jsonStr);
     }
 
     @Override
