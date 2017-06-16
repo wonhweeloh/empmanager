@@ -24,5 +24,38 @@
               android:layout_height="wrap_content"
               android:hint="@string/email"
               android:text="@={employee.email}" />
+          <RelativeLayout
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
+              <Button
+                  android:id="@+id/btnAdd"
+                  style="@android:style/Widget.Button"
+                  android:layout_width="@dimen/btnSize"
+                  android:layout_height="@dimen/btnSize"
+                  android:layout_alignParentLeft="true"
+                  android:layout_alignParentTop="true"
+                  android:drawableTop="@drawable/exit"
+                  android:text="@string/exit_no_save_btn" />
+              <Button
+                  android:id="@+id/btnSave"
+                  style="@android:style/Widget.Button"
+                  android:layout_width="@dimen/btnSize"
+                  android:layout_height="@dimen/btnSize"
+                  android:layout_alignParentTop="true"
+                  android:layout_centerHorizontal="true"
+                  android:layout_gravity="center_horizontal"
+                  android:drawableTop="@drawable/save"
+                  android:text="@string/save_category" />
+              <Button
+                  android:id="@+id/btnDelete"
+                  style="@android:style/Widget.Button"
+                  android:layout_width="@dimen/btnSize"
+                  android:layout_height="@dimen/btnSize"
+                  android:layout_alignParentRight="true"
+                  android:layout_alignParentTop="true"
+                  android:layout_gravity="right"
+                  android:drawableTop="@drawable/delete"
+                  android:text="@string/delete_category" />
+          </RelativeLayout>
         </LinearLayout>
 </layout>

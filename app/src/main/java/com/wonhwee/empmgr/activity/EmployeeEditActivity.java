@@ -10,6 +10,8 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Spinner;
 
 import com.wonhwee.empmgr.data.PositionListAdapter;
@@ -29,6 +31,7 @@ public class EmployeeEditActivity extends AppCompatActivity {
     PositionListAdapter positionListAdapter;
     private boolean mIsCancelling = false;
     private boolean mIsDeleting = false;
+    private boolean mIsSaved = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +45,42 @@ public class EmployeeEditActivity extends AppCompatActivity {
         employee = (Employee)intent.getSerializableExtra("employee");
         positionList = (PositionList) intent.getSerializableExtra("positions");
 
+        final Button btnAdd = (Button) findViewById(R.id.btnAdd);
+        btnAdd.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                mIsCancelling = true;
+                finish();
+            }
+        });
+
+        final Button btnSave = (Button) findViewById(R.id.btnSave);
+        btnSave.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                saveEmployee();
+                mIsSaved = true;
+                if(employee != null && employee.Id.get() == 0){
+                    // This is new employee.
+                    finish();
+                }
+            }
+        });
+
+        final Button btnDelete = (Button) findViewById(R.id.btnDelete);
+        btnDelete.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                new AlertDialog.Builder(EmployeeEditActivity.this)
+                        .setTitle(getString(R.string.delete_todo_dialog_title))
+                        .setMessage(getString(R.string.delete_todo_dialog))
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                deleteEmployee();
+                            }})
+                        .setNegativeButton(android.R.string.no, null).show();
+            }
+        });
+
         //*** Populate position data on UI ***//
         positionListAdapter = new PositionListAdapter(positionList.ItemList);
         spinPositions =(Spinner) findViewById(R.id.spPositions);
@@ -53,6 +92,7 @@ public class EmployeeEditActivity extends AppCompatActivity {
         if (Integer.valueOf(employee.positionid.get()) == 0) {
             position = 1;
             spinPositions.setSelection(position);
+            //btnSave.setVisibility(View.GONE);
         }
         else {
             for (Position cat : positionList.ItemList) {
@@ -80,19 +120,8 @@ public class EmployeeEditActivity extends AppCompatActivity {
                     .setMessage(getString(R.string.delete_todo_dialog))
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-
                         public void onClick(DialogInterface dialog, int whichButton) {
-                            //delete
-                            Uri uri =  Uri.withAppendedPath(EmpMgrContract.EmployeeEntry.CONTENT_URI, String.valueOf(employee.Id.get()));
-
-                            String selection = EmpMgrContract.EmployeeEntry._ID + "=?";
-                            String[] arguments = new String[1];
-                            arguments[0] = String.valueOf(employee.Id.get());
-
-                            empMgrAsyncQueryHandler.startDelete(1, null, uri, selection, arguments);
-                            mIsDeleting = true;
-                            Intent intent = new Intent(EmployeeEditActivity.this, EmployeeListActivity.class);
-                            startActivity(intent);
+                            deleteEmployee();
                         }})
                     .setNegativeButton(android.R.string.no, null).show();
         }
@@ -109,11 +138,6 @@ public class EmployeeEditActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        String [] args = new String[1];
-        EmpMgrAsyncQueryHandler empMgrAsyncQueryHandler =  new EmpMgrAsyncQueryHandler(getContentResolver());
-
-        Position position = (Position) spinPositions.getSelectedItem();
-        int posId = position.posId.get();
 
         //*** Validation (start) ***//
         if(employee == null){
@@ -133,19 +157,44 @@ public class EmployeeEditActivity extends AppCompatActivity {
         }
         //*** Validation (end) ***//
 
+        saveEmployee();
+    }
+
+    private void saveEmployee() {
+        String [] args = new String[1];
+        EmpMgrAsyncQueryHandler empMgrAsyncQueryHandler =  new EmpMgrAsyncQueryHandler(getContentResolver());
+
+        Position position = (Position) spinPositions.getSelectedItem();
+        int posId = position.posId.get();
+
         ContentValues values = new ContentValues();
         values.put(EmpMgrContract.EmployeeEntry.COLUMN_TEXT, employee.text.get());
         values.put(EmpMgrContract.EmployeeEntry.COLUMN_POSITIONID, posId);
         values.put(EmpMgrContract.EmployeeEntry.COLUMN_DONE, employee.done.get());
         values.put(EmpMgrContract.EmployeeEntry.COLUMN_EMAIL, employee.email.get());
         values.put(EmpMgrContract.EmployeeEntry.COLUMN_END_DATE, employee.end_date.get());
-        if(employee != null && employee.Id.get() != 0) {
+
+        if(employee != null && employee.Id.get() != 0) {  // Update
             args[0] = String.valueOf(employee.Id.get());
             empMgrAsyncQueryHandler.startUpdate(1,null, EmpMgrContract.EmployeeEntry.CONTENT_URI, values, EmpMgrContract.EmployeeEntry._ID + "=?", args);
         }
-        else if(employee != null && employee.Id.get() == 0) {
+        else if(employee != null && employee.Id.get() == 0 && !mIsSaved) {  // Insert
             empMgrAsyncQueryHandler.startInsert(1,null, EmpMgrContract.EmployeeEntry.CONTENT_URI, values);
         }
+    }
+
+    private void deleteEmployee() {
+        //delete
+        Uri uri =  Uri.withAppendedPath(EmpMgrContract.EmployeeEntry.CONTENT_URI, String.valueOf(employee.Id.get()));
+
+        String selection = EmpMgrContract.EmployeeEntry._ID + "=?";
+        String[] arguments = new String[1];
+        arguments[0] = String.valueOf(employee.Id.get());
+
+        empMgrAsyncQueryHandler.startDelete(1, null, uri, selection, arguments);
+        mIsDeleting = true;
+        Intent intent = new Intent(EmployeeEditActivity.this, EmployeeListActivity.class);
+        startActivity(intent);
     }
 
     private void sendEmail() {
@@ -173,5 +222,4 @@ public class EmployeeEditActivity extends AppCompatActivity {
         intent.putExtra(Intent.EXTRA_TEXT, text);
         startActivity(intent);
     }
-
 }
