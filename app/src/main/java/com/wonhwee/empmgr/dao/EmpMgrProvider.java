@@ -125,7 +125,7 @@ public class EmpMgrProvider extends ContentProvider{
             String email = values.get(EmployeeEntry.COLUMN_EMAIL).toString();
             String name = values.get(EmployeeEntry.COLUMN_TEXT).toString().replace(" ", "%20");
             String code = values.get(EmployeeEntry.COLUMN_POSITIONID).toString();
-            String jsonStr = HttpClient.getResponse(empmgr_server_proto_ip_port + "/empmgr/updateemployee.json?email=" + email + "&name=" + name + "&code=" + code + "&id=-1");
+            String jsonStr = HttpClient.getResponse(empmgr_server_proto_ip_port + "/updateemployee.json?email=" + email + "&name=" + name + "&code=" + code + "&id=-1");
 
             Log.d(module, "jsonStr:" + jsonStr);
 
@@ -149,6 +149,9 @@ public class EmpMgrProvider extends ContentProvider{
             Log.e("Error", "insert error for URI " + uri);
             return null;
         }
+
+        helper.refreshEmployees();  // To refresh list employee list in case of changed from other devices.
+
         getContext().getContentResolver().notifyChange(uri, null);
         return ContentUris.withAppendedId(uri, id);
     }
@@ -178,7 +181,7 @@ public class EmpMgrProvider extends ContentProvider{
     private int deleteRecord(Uri uri, String selection, String[] selectionArgs, String tableName) {
         if(tableName.equals(EmpMgrContract.EmployeeEntry.TABLE_NAME) && selectionArgs != null && selectionArgs.length > 0) {
             String id = selectionArgs[0];
-            String jsonStr = HttpClient.getResponse(empmgr_server_proto_ip_port + "/empmgr/deleteemployee.json?id=" + id);
+            String jsonStr = HttpClient.getResponse(empmgr_server_proto_ip_port + "/deleteemployee.json?id=" + id);
 
             Log.d(module, "jsonStr:" + jsonStr);
 
@@ -194,6 +197,9 @@ public class EmpMgrProvider extends ContentProvider{
             Log.e("Error", "delete unknown URI " + uri);
             return -1;
         }
+
+        helper.refreshEmployees();  // To refresh list employee list in case of changed from other devices.
+
         getContext().getContentResolver().notifyChange(uri, null);
         return id;
     }
@@ -217,7 +223,7 @@ public class EmpMgrProvider extends ContentProvider{
             String name = values.get(EmployeeEntry.COLUMN_TEXT).toString().replace(" ", "%20");
             String code = values.get(EmployeeEntry.COLUMN_POSITIONID).toString();
             String id = selectionArgs[0];
-            String jsonStr = HttpClient.getResponse(empmgr_server_proto_ip_port + "/empmgr/updateemployee.json?email=" + email + "&name=" + name + "&code=" + code + "&id=" + id);
+            String jsonStr = HttpClient.getResponse(empmgr_server_proto_ip_port + "/updateemployee.json?email=" + email + "&name=" + name + "&code=" + code + "&id=" + id);
 
             Log.d(module, "jsonStr:" + jsonStr);
 
@@ -233,6 +239,9 @@ public class EmpMgrProvider extends ContentProvider{
             Log.e("Error", "update error for URI " + uri);
             return -1;
         }
+
+        helper.refreshEmployees();  // To refresh list employee list in case of changed from other devices.
+
         getContext().getContentResolver().notifyChange(uri, null);
         return id;
     }

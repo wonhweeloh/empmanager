@@ -20,8 +20,10 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
     private final Resources res;
     private final String packageName;
-    private static final String DATABASE_NAME = "empmgrapp.db";
+    private static final String DATABASE_NAME = "empmgrapp.sqLiteDatabase";
     private static final int DATABASE_VERSION = 1;
+    private SQLiteDatabase sqLiteDatabase = null;
+
     private static final String TABLE_CATEGORIES_CREATE=
             "CREATE TABLE " + PositionEntry.TABLE_NAME + " (" +
                     PositionEntry._ID + " INTEGER PRIMARY KEY, " +
@@ -49,8 +51,9 @@ public class DatabaseHelper extends SQLiteOpenHelper{
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(TABLE_CATEGORIES_CREATE);
-        db.execSQL(TABLE_TODOS_CREATE);
+        this.sqLiteDatabase = db;
+        this.sqLiteDatabase.execSQL(TABLE_CATEGORIES_CREATE);
+        this.sqLiteDatabase.execSQL(TABLE_TODOS_CREATE);
 
         //*** Setting up sample position and employee data from strings.xml (start) ***/
         String[] position_sample_array = res.getStringArray(res.getIdentifier("position_sample_array", "array", packageName));
@@ -70,7 +73,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 values.put(PositionEntry._ID, id);
                 values.put(PositionEntry.COLUMN_DESCRIPTION, desc);
                 values.put(PositionEntry.COLUMN_CODE, code);
-                idPosition = db.insert(PositionEntry.TABLE_NAME, null, values);
+                idPosition = this.sqLiteDatabase.insert(PositionEntry.TABLE_NAME, null, values);
                 values.clear();
             }catch(JSONException e){
                 Log.d(e.getMessage(), "Failed to parse:" + jsonStr);
@@ -89,7 +92,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 values.put(EmployeeEntry.COLUMN_POSITIONID, String.valueOf(idPosition));
                 values.put(EmployeeEntry.COLUMN_TEXT, name);
                 values.put(EmployeeEntry.COLUMN_EMAIL, email);
-                long idEmployee = db.insert(EmployeeEntry.TABLE_NAME, null, values);
+                long idEmployee = sqLiteDatabase.insert(EmployeeEntry.TABLE_NAME, null, values);
             }catch(JSONException e){
                 Log.d(e.getMessage(), "Failed to parse:" + employee_sample_array);
                 values.clear();
@@ -97,8 +100,13 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         }*/
         //*** Setting up sample position and employee data from strings.xml (end) ***/
 
+        refreshEmployees();
+    }
+
+    protected void refreshEmployees() {
         String empmgr_server_proto_ip_port = res.getString(res.getIdentifier("empmgr_server_proto_ip_port", "string", packageName));
-        String jsonStr = HttpClient.getResponse(empmgr_server_proto_ip_port + "/empmgr/employees.json");
+        String jsonStr = HttpClient.getResponse(empmgr_server_proto_ip_port + "/employees.json");
+        ContentValues values = new ContentValues();
 
         if (jsonStr != null && jsonStr.length() > 0) {
 
@@ -106,6 +114,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                 JSONArray jsonArray = new JSONArray(jsonStr);
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
+                    values.clear();
 
                     long id = jsonObject.getLong("id");
                     String text = jsonObject.getString("text");
@@ -116,7 +125,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                     values.put(EmployeeEntry.COLUMN_TEXT, text);
                     values.put(EmployeeEntry.COLUMN_EMAIL, email);
                     values.put(EmployeeEntry.COLUMN_POSITIONID, positionId);
-                    long idEmployee = db.insert(EmployeeEntry.TABLE_NAME, null, values);
+                    long idEmployee = this.sqLiteDatabase.insert(EmployeeEntry.TABLE_NAME, null, values);
                 }
             } catch (JSONException e) {
                 Log.e(module, e.getMessage());

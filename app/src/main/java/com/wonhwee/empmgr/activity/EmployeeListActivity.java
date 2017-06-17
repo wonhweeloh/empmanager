@@ -125,9 +125,9 @@ public class EmployeeListActivity extends AppCompatActivity implements LoaderMan
                 Intent intent = new Intent(EmployeeListActivity.this, PositionEditActivity.class);
                 startActivity(intent);
                 break;*/
-            case R.id.action_delete_all_employees:
+/*            case R.id.action_delete_all_employees:
                 deleteEmployee(ALL_ROWS);
-                break;
+                break;*/
             case R.id.action_add_employee:
                 newEmployee();
                 break;

@@ -12,9 +12,9 @@
         android:orderInCategory="101"
         android:title="@string/action_add_employee"
         app:showAsAction="never" />
-    <item
+<!--    <item
         android:id="@+id/action_delete_all_employees"
         android:orderInCategory="101"
         android:title="@string/action_delete_all_employees"
-        app:showAsAction="never" />
+        app:showAsAction="never" />-->
 </menu>
