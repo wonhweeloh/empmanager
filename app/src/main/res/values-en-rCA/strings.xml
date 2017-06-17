@@ -32,6 +32,7 @@
 
     <string name="employee_sample">{\'name\':\'Wonhwee Loh\', \'email\':\'wonhwee_loh@yahoo.ca\'}</string>
 
-    <string name="empmgr_server_proto_ip_port">http://192.168.1.15:8080</string>
+    <!--<string name="empmgr_server_proto_ip_port">http://192.168.1.15:8080</string>-->
+    <string name="empmgr_server_proto_ip_port">http://wonhwee.com</string>
 
 </resources>
