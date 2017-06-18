@@ -109,6 +109,8 @@ public class DatabaseHelper extends SQLiteOpenHelper{
         ContentValues values = new ContentValues();
 
         if (jsonStr != null && jsonStr.length() > 0) {
+            // Delete all old employee data before insert fresh data from remote.
+            long idEmployee = this.sqLiteDatabase.delete(EmployeeEntry.TABLE_NAME, null, null);
 
             try {
                 JSONArray jsonArray = new JSONArray(jsonStr);
@@ -130,7 +132,7 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                         this.sqLiteDatabase = getReadableDatabase();
                     }
 
-                    long idEmployee = this.sqLiteDatabase.insert(EmployeeEntry.TABLE_NAME, null, values);
+                    idEmployee = this.sqLiteDatabase.insert(EmployeeEntry.TABLE_NAME, null, values);
                 }
             } catch (JSONException e) {
                 Log.e(module, e.getMessage());
