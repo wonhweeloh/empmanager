@@ -125,6 +125,11 @@ public class DatabaseHelper extends SQLiteOpenHelper{
                     values.put(EmployeeEntry.COLUMN_TEXT, text);
                     values.put(EmployeeEntry.COLUMN_EMAIL, email);
                     values.put(EmployeeEntry.COLUMN_POSITIONID, positionId);
+
+                    if(this.sqLiteDatabase == null){
+                        this.sqLiteDatabase = getReadableDatabase();
+                    }
+
                     long idEmployee = this.sqLiteDatabase.insert(EmployeeEntry.TABLE_NAME, null, values);
                 }
             } catch (JSONException e) {
